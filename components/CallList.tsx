@@ -14,6 +14,8 @@ const CallList = ({ type }: { type: 'ended' | 'upcoming' | 'recordings' }) => {
     useGetCalls();
   const [recordings, setRecordings] = useState<CallRecording[]>([]);
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://call-bridge.vercel.app';
+
   const getCalls = () => {
     switch (type) {
       case 'ended':
@@ -89,7 +91,7 @@ const CallList = ({ type }: { type: 'ended' | 'upcoming' | 'recordings' }) => {
             link={
               type === 'recordings'
                 ? (meeting as CallRecording).url
-                : `${process.env.NEXT_PUBLIC_BASE_URL}/meeting/${(meeting as Call).id}`
+                : `${baseUrl}/meeting/${(meeting as Call).id}`
             }
             buttonIcon1={type === 'recordings' ? '/icons/play.svg' : undefined}
             buttonText={type === 'recordings' ? 'Play' : 'Start'}
