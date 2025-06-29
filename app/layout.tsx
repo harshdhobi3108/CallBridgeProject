@@ -1,3 +1,4 @@
+// app/layout.tsx
 import { ReactNode } from "react";
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -6,7 +7,9 @@ import { Inter } from "next/font/google";
 import "@stream-io/video-react-sdk/dist/css/styles.css";
 import "react-datepicker/dist/react-datepicker.css";
 import "./globals.css";
+
 import { Toaster } from "@/components/ui/toaster";
+import StreamClientProvider from "@/providers/StreamClientProvider"; // ✅ Import your provider
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,10 +28,7 @@ export default function RootLayout({
     <html lang="en">
       <ClerkProvider
         appearance={{
-          layout: {
-            socialButtonsVariant: "iconButton",
-            // logoImageUrl: "/icons/yoom-logo.svg",
-          },
+          layout: { socialButtonsVariant: "iconButton" },
           variables: {
             colorText: "#fff",
             colorPrimary: "#0E78F9",
@@ -40,7 +40,9 @@ export default function RootLayout({
       >
         <body className={`${inter.className} bg-dark-2`}>
           <Toaster />
-          {children}
+          <StreamClientProvider> {/* ✅ Must wrap children */}
+            {children}
+          </StreamClientProvider>
         </body>
       </ClerkProvider>
     </html>
