@@ -34,6 +34,7 @@ const PersonalRoom = () => {
   const { toast } = useToast();
 
   const meetingId = user?.id;
+  const displayName = user?.username || user?.firstName || "User";
 
   const { call } = useGetCallById(meetingId!);
 
@@ -53,13 +54,17 @@ const PersonalRoom = () => {
     router.push(`/meeting/${meetingId}?personal=true`);
   };
 
-  const meetingLink = `${process.env.NEXT_PUBLIC_BASE_URL}/meeting/${meetingId}?personal=true`;
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ??
+    (typeof window !== "undefined" ? window.location.origin : "");
+
+  const meetingLink = `${baseUrl}/meeting/${meetingId}?personal=true`;
 
   return (
     <section className="flex size-full flex-col gap-10 text-white">
       <h1 className="text-xl font-bold lg:text-3xl">Personal Meeting Room</h1>
       <div className="flex w-full flex-col gap-8 xl:max-w-[900px]">
-        <Table title="Topic" description={`${user?.username}'s Meeting Room`} />
+        <Table title="Topic" description={`${displayName}'s Meeting Room`} />
         <Table title="Meeting ID" description={meetingId!} />
         <Table title="Invite Link" description={meetingLink} />
       </div>

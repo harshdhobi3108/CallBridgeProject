@@ -1,28 +1,30 @@
-// hooks/useGetCallById.ts
 import { useEffect, useState } from 'react';
 import { Call, useStreamVideoClient } from '@stream-io/video-react-sdk';
 
-export const useGetCallById = (id: string | string[] | undefined) => {
-  const client = useStreamVideoClient();
-  const [call, setCall] = useState<Call | null>(null);
+export const useGetCallById = (id: string | string[]) => {
+  const [call, setCall] = useState<Call>();
   const [isCallLoading, setIsCallLoading] = useState(true);
 
-  useEffect(() => {
-    if (!client || !id) return;
+  const client = useStreamVideoClient();
 
-    const getCall = async () => {
+  useEffect(() => {
+    if (!client) return;
+    
+    const loadCall = async () => {
       try {
-        const callInstance = client.call('default', id as string);
-        await callInstance.join(); // 🔥 required to activate media + state
-        setCall(callInstance);
-      } catch (err) {
-        console.error('Error joining call:', err);
-      } finally {
+        // https://getstream.io/video/docs/react/guides/querying-calls/#filters
+        const { calls } = await client.queryCalls({ filter_conditions: { id } });
+
+        if (calls.length > 0) setCall(calls[0]);
+
+        setIsCallLoading(false);
+      } catch (error) {
+        console.error(error);
         setIsCallLoading(false);
       }
     };
 
-    getCall();
+    loadCall();
   }, [client, id]);
 
   return { call, isCallLoading };

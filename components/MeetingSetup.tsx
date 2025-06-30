@@ -25,14 +25,8 @@ const MeetingSetup = ({
 
   const call = useCall();
 
-  if (!call) {
-    throw new Error(
-      'useCall must be used within a StreamCall component.'
-    );
-  }
-
   const [isMicCamToggled, setIsMicCamToggled] = useState(false);
-  const [joined, setJoined] = useState(false);
+  const [hasJoined, setHasJoined] = useState(false);
 
   useEffect(() => {
     if (!call) return;
@@ -48,13 +42,15 @@ const MeetingSetup = ({
 
   const handleJoin = async () => {
     try {
-      await call.join();
-      setJoined(true);
+      await call?.join(); // ensure await before rendering anything dependent
+      setHasJoined(true);
       setIsSetupComplete(true);
     } catch (err) {
       console.error('Error joining call:', err);
     }
   };
+
+  if (!call) return <Alert title="Call is not ready yet." />;
 
   if (callTimeNotArrived)
     return (
@@ -75,8 +71,8 @@ const MeetingSetup = ({
     <div className="flex h-screen w-full flex-col items-center justify-center gap-3 text-white">
       <h1 className="text-center text-2xl font-bold">Setup</h1>
 
-      {/* Only show preview after joining */}
-      {joined && <VideoPreview />}
+      {/* Only render after join */}
+      {hasJoined && <VideoPreview />}
 
       <div className="flex h-16 items-center justify-center gap-3">
         <label className="flex items-center justify-center gap-2 font-medium">
@@ -90,7 +86,7 @@ const MeetingSetup = ({
         <DeviceSettings />
       </div>
 
-      {!joined && (
+      {!hasJoined && (
         <Button
           className="rounded-md bg-green-500 px-4 py-2.5"
           onClick={handleJoin}
