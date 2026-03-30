@@ -108,28 +108,3 @@ Steps:
 2. Import project in Vercel
 3. Add environment variables
 4. Deploy 🚀
-
----
-
-## ⚠️ Known Issues
-
-* WebSocket-based features require proper backend handling
-* Ensure correct environment variables for production
-* Domain must be updated in Clerk allowed origins
-
----
-
-## 📌 Future Improvements
-
-* 📱 Mobile optimization
-* 🧠 AI meeting summaries
-* 🔔 Notifications system
-* 📊 Analytics dashboard
-
----
-
-## 🙌 Author
-
-**Harsh Dhobi**
-📧 Connect on GitHub: https://github.com/harshdhobi3108
-
