@@ -1,6 +1,6 @@
 'use client';
 
-import { Call, CallRecording } from '@stream-io/video-react-sdk';
+import { Call} from '@stream-io/video-react-sdk';
 import Loader from './Loader';
 import { useGetCalls } from '@/hooks/useGetCalls';
 import MeetingCard from './MeetingCard';
