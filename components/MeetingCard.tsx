@@ -1,11 +1,10 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-
-import { cn } from "@/lib/utils";
-import { Button } from "./ui/button";
-import { avatarImages } from "@/constants";
-import { useToast } from "./ui/use-toast";
+import Image from 'next/image';
+import { cn } from '@/lib/utils';
+import { Button } from './ui/button';
+import { avatarImages } from '@/constants';
+import { useToast } from './ui/use-toast';
 
 interface MeetingCardProps {
   title: string;
@@ -31,7 +30,8 @@ const MeetingCard = ({
   const { toast } = useToast();
 
   return (
-    <section className="flex min-h-[258px] w-full flex-col justify-between rounded-[14px] bg-dark-1 px-5 py-8 xl:max-w-[568px]">
+    // ✅ Add `relative` here so delete button (absolute) works
+    <section className="relative flex min-h-[258px] w-full flex-col justify-between rounded-[14px] bg-dark-1 px-5 py-8 xl:max-w-[568px]">
       <article className="flex flex-col gap-5">
         <Image src={icon} alt="upcoming" width={28} height={28} />
         <div className="flex justify-between">
@@ -41,7 +41,7 @@ const MeetingCard = ({
           </div>
         </div>
       </article>
-      <article className={cn("flex justify-center relative", {})}>
+      <article className={cn('flex justify-center relative', {})}>
         <div className="relative flex w-full max-sm:hidden">
           {avatarImages.map((img, index) => (
             <Image
@@ -50,7 +50,7 @@ const MeetingCard = ({
               alt="attendees"
               width={40}
               height={40}
-              className={cn("rounded-full", { absolute: index > 0 })}
+              className={cn('rounded-full', { absolute: index > 0 })}
               style={{ top: 0, left: index * 28 }}
             />
           ))}
@@ -69,9 +69,7 @@ const MeetingCard = ({
             <Button
               onClick={() => {
                 navigator.clipboard.writeText(link);
-                toast({
-                  title: "Link Copied",
-                });
+                toast({ title: 'Link Copied' });
               }}
               className="bg-dark-4 px-6"
             >

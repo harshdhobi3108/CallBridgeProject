@@ -1,4 +1,5 @@
 // app/layout.tsx
+
 import { ReactNode } from "react";
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -9,7 +10,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import "./globals.css";
 
 import { Toaster } from "@/components/ui/toaster";
-import StreamClientProvider from "@/providers/StreamClientProvider"; // ✅ Import your provider
+import StreamClientProvider from "@/providers/StreamClientProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,28 +24,33 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{ children: ReactNode }>) {
+}: {
+  children: ReactNode;
+}) {
   return (
     <html lang="en">
-      <ClerkProvider
-        appearance={{
-          layout: { socialButtonsVariant: "iconButton" },
-          variables: {
-            colorText: "#fff",
-            colorPrimary: "#0E78F9",
-            colorBackground: "#1C1F2E",
-            colorInputBackground: "#252A41",
-            colorInputText: "#fff",
-          },
-        }}
-      >
-        <body className={`${inter.className} bg-dark-2`}>
+      <body className={`${inter.className} bg-dark-2`}>
+        <ClerkProvider
+          appearance={{
+            layout: { socialButtonsVariant: "iconButton" },
+            variables: {
+              colorText: "#fff",
+              colorPrimary: "#0E78F9",
+              colorBackground: "#1C1F2E",
+              colorInputBackground: "#252A41",
+              colorInputText: "#fff",
+            },
+          }}
+        >
           <Toaster />
-          <StreamClientProvider> {/* ✅ Must wrap children */}
+
+          <StreamClientProvider>
             {children}
           </StreamClientProvider>
-        </body>
-      </ClerkProvider>
+
+        </ClerkProvider>
+      </body>
     </html>
   );
 }
+

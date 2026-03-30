@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@clerk/nextjs": "^5.0.0-beta.35",
+    "@clerk/nextjs": "^5.7.5",
     "@mediapipe/selfie_segmentation": "^0.1.1675465747",
     "@netlify/next": "^1.4.9",
     "@radix-ui/react-dialog": "^1.0.5",

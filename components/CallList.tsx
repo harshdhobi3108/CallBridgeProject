@@ -1,7 +1,6 @@
 'use client';
 
 import { Call, CallRecording } from '@stream-io/video-react-sdk';
-
 import Loader from './Loader';
 import { useGetCalls } from '@/hooks/useGetCalls';
 import MeetingCard from './MeetingCard';
@@ -12,8 +11,7 @@ import { Trash2 } from 'lucide-react';
 const CallList = ({ type }: { type: 'ended' | 'upcoming' | 'recordings' }) => {
   const router = useRouter();
   const { endedCalls, upcomingCalls, callRecordings, isLoading } = useGetCalls();
-  const [recordings, setRecordings] = useState<CallRecording[]>([]);
-
+  const [recordings, setRecordings] = useState<any[]>([]);
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
 
   const getCalls = () => {
@@ -45,14 +43,17 @@ const CallList = ({ type }: { type: 'ended' | 'upcoming' | 'recordings' }) => {
   useEffect(() => {
     const fetchRecordings = async () => {
       const callData = await Promise.all(
-        callRecordings?.map((meeting) => meeting.queryRecordings()) ?? []
+        callRecordings?.map(async (call) => {
+          const result = await call.queryRecordings();
+          return result.recordings.map((r) => ({
+            ...r,
+            call_cid: call.cid, // ✅ attach call_cid manually
+          }));
+        }) ?? []
       );
 
-      const recordings = callData
-        .filter((call) => call.recordings.length > 0)
-        .flatMap((call) => call.recordings);
-
-      setRecordings(recordings);
+      const allRecordings = callData.flat();
+      setRecordings(allRecordings);
     };
 
     if (type === 'recordings') {
@@ -65,23 +66,31 @@ const CallList = ({ type }: { type: 'ended' | 'upcoming' | 'recordings' }) => {
     callCid: string | undefined,
     sessionId: string | undefined
   ) => {
+    console.log('🔥 DELETE CLICKED:', { recordingId, callCid, sessionId });
+
     const confirmed = confirm('Are you sure you want to delete this recording?');
     if (!confirmed || !callCid || !sessionId) return;
 
-    const callId = callCid.split(':')[1]; // extract 'callId' from 'default:callId'
+    const callId = callCid.split(':')[1];
 
     try {
-      await fetch(`/api/delete-recording`, {
+      const res = await fetch(`/api/delete-recording`, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ callId, sessionId }),
       });
 
+      const data = await res.json();
+      console.log('✅ Delete response:', data);
+
+      if (!res.ok) {
+        alert('Failed to delete recording: ' + data.error);
+        return;
+      }
+
       setRecordings((prev) => prev.filter((r) => r.id !== recordingId));
     } catch (error) {
-      console.error('Delete failed', error);
+      console.error('❌ Delete failed', error);
       alert('Failed to delete recording.');
     }
   };
@@ -94,10 +103,19 @@ const CallList = ({ type }: { type: 'ended' | 'upcoming' | 'recordings' }) => {
   return (
     <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
       {calls && calls.length > 0 ? (
-        calls.map((meeting: Call | CallRecording) => {
+        calls.map((meeting: Call | any, index: number) => {
           const isRecording = type === 'recordings';
-          const meetingId = (meeting as Call).id || (meeting as CallRecording).id;
-          const recording = meeting as CallRecording;
+          const call = meeting as Call;
+          const recording = meeting;
+
+          const recordingId = recording?.id ?? `rec-${index}`;
+          const callCid = recording?.call_cid;
+          const sessionId = recording?.session_id;
+
+          const meetingId =
+            call?.id ||
+            recording?.id ||
+            `${sessionId}-${Math.random().toString(36).substring(2, 6)}`;
 
           return (
             <div key={meetingId} className="relative">
@@ -110,34 +128,34 @@ const CallList = ({ type }: { type: 'ended' | 'upcoming' | 'recordings' }) => {
                     : '/icons/recordings.svg'
                 }
                 title={
-                  (meeting as Call).state?.custom?.description ||
-                  recording.filename?.substring(0, 20) ||
+                  call?.state?.custom?.description ||
+                  recording?.filename?.substring(0, 20) ||
                   'No Description'
                 }
                 date={
-                  (meeting as Call).state?.startsAt?.toLocaleString() ||
-                  recording.start_time?.toLocaleString()
+                  call?.state?.startsAt?.toLocaleString() ||
+                  recording?.start_time?.toLocaleString() ||
+                  ''
                 }
                 isPreviousMeeting={type === 'ended'}
                 link={
                   isRecording
-                    ? recording.url
-                    : `${baseUrl}/meeting/${(meeting as Call).id}`
+                    ? recording?.url ?? '#'
+                    : `${baseUrl}/meeting/${call?.id}`
                 }
                 buttonIcon1={isRecording ? '/icons/play.svg' : undefined}
                 buttonText={isRecording ? 'Play' : 'Start'}
                 handleClick={
                   isRecording
-                    ? () => router.push(recording.url)
-                    : () => router.push(`/meeting/${(meeting as Call).id}`)
+                    ? () => router.push(recording?.url ?? '#')
+                    : () => router.push(`/meeting/${call?.id}`)
                 }
               />
 
-              {isRecording && (
+              {/* ✅ Show delete icon if valid recording */}
+              {isRecording && callCid && sessionId && (
                 <button
-                  onClick={() =>
-                    handleDelete(recording.id, recording.call_cid, recording.session_id)
-                  }
+                  onClick={() => handleDelete(recordingId, callCid, sessionId)}
                   className="absolute top-2 right-4 text-blue-500 hover:text-blue-700"
                   title="Delete Recording"
                 >
